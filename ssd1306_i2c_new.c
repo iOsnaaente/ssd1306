@@ -22,7 +22,7 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 		.flags.enable_internal_pullup = true,
 	};
 	i2c_master_bus_handle_t i2c_bus_handle;
-	ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle));
+	i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle);
 
 	i2c_device_config_t dev_cfg = {
 		.dev_addr_length = I2C_ADDR_BIT_LEN_7,
@@ -30,7 +30,7 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 		.scl_speed_hz = dev->_i2c_freq_hz,
 	};
 	i2c_master_dev_handle_t i2c_dev_handle;
-	ESP_ERROR_CHECK(i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &i2c_dev_handle));
+	i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
 
 	if (reset >= 0) {
 		//gpio_pad_select_gpio(reset);
@@ -68,7 +68,7 @@ void i2c_device_add(SSD1306_t * dev, i2c_port_t i2c_num, int16_t reset, uint16_t
 		.scl_speed_hz = dev->_i2c_freq_hz,
 	};
 	i2c_master_dev_handle_t i2c_dev_handle;
-	ESP_ERROR_CHECK(i2c_master_bus_add_device(dev->_i2c_bus_handle, &dev_cfg, &i2c_dev_handle));
+	i2c_master_bus_add_device(dev->_i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
 
 	if (reset >= 0) {
 		//gpio_pad_select_gpio(reset);
