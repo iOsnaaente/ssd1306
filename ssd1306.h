@@ -112,6 +112,7 @@ typedef struct {
 	bool _flip;
 	i2c_port_t _i2c_num;
 	int _i2c_freq_hz;
+	int _ticks_to_wait;
 	spi_device_handle_t _spi_device_handle;
 #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0))
 	i2c_master_bus_handle_t _i2c_bus_handle;
