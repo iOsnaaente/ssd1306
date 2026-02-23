@@ -125,6 +125,8 @@ extern "C"
 {
 #endif
 
+extern volatile bool ssd1306_i2c_bus_inicialized;
+
 void ssd1306_init(SSD1306_t * dev, int width, int height);
 int ssd1306_get_width(SSD1306_t * dev);
 int ssd1306_get_height(SSD1306_t * dev);

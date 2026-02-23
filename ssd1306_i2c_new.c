@@ -10,19 +10,39 @@
 
 #define TAG "SSD1306"
 
+#if CONFIG_I2C_PORT_0
+#define I2C_NUM I2C_NUM_0
+#elif CONFIG_I2C_PORT_1
+#define I2C_NUM I2C_NUM_1
+#else
+#define I2C_NUM I2C_NUM_0 // if spi is selected
+#endif
+
+volatile bool ssd1306_i2c_bus_inicialized = false;
+static i2c_master_bus_handle_t s_i2c_bus_handle = NULL;
+
 
 void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 	ESP_LOGI(TAG, "New i2c driver is used");
-	i2c_master_bus_config_t i2c_mst_config = {
-		.clk_source = I2C_CLK_SRC_DEFAULT,
-		.glitch_ignore_cnt = 7,
-		.i2c_port = dev->_i2c_num,
-		.scl_io_num = scl,
-		.sda_io_num = sda,
-		.flags.enable_internal_pullup = true,
-	};
-	i2c_master_bus_handle_t i2c_bus_handle;
-	i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle);
+	dev->_i2c_num = I2C_NUM;
+	if ( ssd1306_i2c_bus_inicialized == false) {
+		i2c_master_bus_config_t i2c_mst_config = {
+			.clk_source = I2C_CLK_SRC_DEFAULT,
+			.glitch_ignore_cnt = 7,
+			.i2c_port = dev->_i2c_num,
+			.scl_io_num = scl,
+			.sda_io_num = sda,
+			.flags.enable_internal_pullup = true,
+		};
+		int ret = i2c_new_master_bus(&i2c_mst_config, &s_i2c_bus_handle);
+		if (ret == ESP_OK) {
+			ESP_LOGI(TAG, "i2c master bus initialized successfully");
+			ssd1306_i2c_bus_inicialized = true;
+		} else {
+			ESP_LOGE(TAG, "Could not initialize i2c master bus: %d (%s)", ret, esp_err_to_name(ret));
+			return;
+		}
+	}
 
 	i2c_device_config_t dev_cfg = {
 		.dev_addr_length = I2C_ADDR_BIT_LEN_7,
@@ -30,7 +50,11 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 		.scl_speed_hz = dev->_i2c_freq_hz,
 	};
 	i2c_master_dev_handle_t i2c_dev_handle;
-	i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
+	esp_err_t add_ret = i2c_master_bus_add_device(s_i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
+	if (add_ret != ESP_OK) {
+		ESP_LOGE(TAG, "Could not add i2c device [0x%02x]: %d (%s)", dev->_address, add_ret, esp_err_to_name(add_ret));
+		return;
+	}
 
 	if (reset >= 0) {
 		//gpio_pad_select_gpio(reset);
@@ -42,7 +66,7 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 	}
 
 	dev->_flip = false;
-	dev->_i2c_bus_handle = i2c_bus_handle;
+	dev->_i2c_bus_handle = s_i2c_bus_handle;
 	dev->_i2c_dev_handle = i2c_dev_handle;
 }
 
@@ -67,8 +91,20 @@ void i2c_device_add(SSD1306_t * dev, i2c_port_t i2c_num, int16_t reset, uint16_t
 		.device_address = i2c_address,
 		.scl_speed_hz = dev->_i2c_freq_hz,
 	};
+	if (dev->_i2c_bus_handle == NULL) {
+		if (ssd1306_i2c_bus_inicialized && s_i2c_bus_handle != NULL) {
+			dev->_i2c_bus_handle = s_i2c_bus_handle;
+		} else {
+			ESP_LOGE(TAG, "i2c bus is not initialized. Call i2c_master_init first.");
+			return;
+		}
+	}
 	i2c_master_dev_handle_t i2c_dev_handle;
-	i2c_master_bus_add_device(dev->_i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
+	esp_err_t add_ret = i2c_master_bus_add_device(dev->_i2c_bus_handle, &dev_cfg, &i2c_dev_handle);
+	if (add_ret != ESP_OK) {
+		ESP_LOGE(TAG, "Could not add i2c device [0x%02x]: %d (%s)", i2c_address, add_ret, esp_err_to_name(add_ret));
+		return;
+	}
 
 	if (reset >= 0) {
 		//gpio_pad_select_gpio(reset);
