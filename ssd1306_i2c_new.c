@@ -10,24 +10,13 @@
 
 #define TAG "SSD1306"
 
-#if CONFIG_I2C_PORT_0
-#define I2C_NUM I2C_NUM_0
-#elif CONFIG_I2C_PORT_1
-#define I2C_NUM I2C_NUM_1
-#else
-#define I2C_NUM I2C_NUM_0 // if spi is selected
-#endif
 
-#define I2C_MASTER_FREQ_HZ 400000 // I2C clock of SSD1306 can run at 400 kHz max.
-#define I2C_TICKS_TO_WAIT 100	  // Maximum ticks to wait before issuing a timeout.
-
-void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset)
-{
+void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset){
 	ESP_LOGI(TAG, "New i2c driver is used");
 	i2c_master_bus_config_t i2c_mst_config = {
 		.clk_source = I2C_CLK_SRC_DEFAULT,
 		.glitch_ignore_cnt = 7,
-		.i2c_port = I2C_NUM,
+		.i2c_port = dev->_i2c_num,
 		.scl_io_num = scl,
 		.sda_io_num = sda,
 		.flags.enable_internal_pullup = true,
@@ -37,8 +26,8 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset)
 
 	i2c_device_config_t dev_cfg = {
 		.dev_addr_length = I2C_ADDR_BIT_LEN_7,
-		.device_address = I2C_ADDRESS,
-		.scl_speed_hz = I2C_MASTER_FREQ_HZ,
+		.device_address = dev->_address,
+		.scl_speed_hz = dev->_i2c_freq_hz,
 	};
 	i2c_master_dev_handle_t i2c_dev_handle;
 	ESP_ERROR_CHECK(i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &i2c_dev_handle));
@@ -52,24 +41,21 @@ void i2c_master_init(SSD1306_t * dev, int16_t sda, int16_t scl, int16_t reset)
 		gpio_set_level(reset, 1);
 	}
 
-	dev->_address = I2C_ADDRESS;
 	dev->_flip = false;
-	dev->_i2c_num = I2C_NUM;
 	dev->_i2c_bus_handle = i2c_bus_handle;
 	dev->_i2c_dev_handle = i2c_dev_handle;
 }
 
-void i2c_device_add(SSD1306_t * dev, i2c_port_t i2c_num, int16_t reset, uint16_t i2c_address)
-{
+void i2c_device_add(SSD1306_t * dev, i2c_port_t i2c_num, int16_t reset, uint16_t i2c_address){
 	ESP_LOGI(TAG, "New i2c driver is used");
 	ESP_LOGW(TAG, "Will not install i2c master driver");
 #if 0
 	i2c_master_bus_config_t i2c_mst_config = {
 		.clk_source = I2C_CLK_SRC_DEFAULT,
 		.glitch_ignore_cnt = 7,
-		.i2c_port = I2C_NUM,
-		.scl_io_num = scl,
-		.sda_io_num = sda,
+		.i2c_port = i2c_num,
+		.scl_io_num = dev->_scl,
+		.sda_io_num = dev->_sda,
 		.flags.enable_internal_pullup = true,
 	};
 	i2c_master_bus_handle_t i2c_bus_handle;
