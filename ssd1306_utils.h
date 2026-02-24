@@ -13,7 +13,7 @@
 
 #include "ssd1306.h"
 #include <cmath>
-
+#include <cstring>
 
 /**
  * @brief   Acende um pixel apenas se estiver dentro dos limites do display
@@ -102,7 +102,7 @@ void ssd1306_clear_internal_buffer(SSD1306_t *dev);
 void ssd1306_render_loading_spinner( 
     SSD1306_t* dev, 
     bool mirror,
-    int SPINNER_POINTS = 12,
-    int SPINNER_RADIUS = 10,
+    int SPINNER_POINTS = 8,
+    int SPINNER_RADIUS = 20,
     double SPINNER_SPEED = 0.1
 );

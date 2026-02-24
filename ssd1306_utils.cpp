@@ -111,12 +111,7 @@ void ssd1306_render_loading_spinner(
     int SPINNER_RADIUS,
     double SPINNER_SPEED
 ) {
-    float angle_right = 0.0f;
-    float angle_left  = 0.0f;
-    float* angle = 
-        (dev == &left_dev) 
-            ? &angle_left 
-            : &angle_right;
+    static float angle = 0.0f;
     // Pega o centro da tela 
     const int center_x = ssd1306_get_width(dev) / 2;
     const int center_y = ssd1306_get_height(dev) / 2;
@@ -125,7 +120,7 @@ void ssd1306_render_loading_spinner(
     ssd1306_clear_internal_buffer(dev);
     
     for (int i = 0; i < SPINNER_POINTS; i++) {
-        float point_angle = *angle + (2.0f * M_PI * i / SPINNER_POINTS);
+        float point_angle = angle + (2.0f * M_PI * i / SPINNER_POINTS);
         if (mirror) {
             point_angle = -point_angle;
         }
@@ -137,7 +132,7 @@ void ssd1306_render_loading_spinner(
         );
         // Intensidade simulada (rastro)
         int brightness_index =
-            (i + (int32_t)(*angle * 10)) % SPINNER_POINTS;
+            (i + (int32_t)(angle * 10)) % SPINNER_POINTS;
         if (brightness_index == 0) {
             ssd1306_draw_dot(dev, x, y, 2, true);
         } else if (brightness_index == 1) {
@@ -147,9 +142,9 @@ void ssd1306_render_loading_spinner(
         }
     }
 
-    *angle += SPINNER_SPEED;
-    if (*angle > 2.0f * M_PI) {
-        *angle -= 2.0f * M_PI;
+    angle += SPINNER_SPEED;
+    if (angle > 2.0f * M_PI) {
+        angle -= 2.0f * M_PI;
     }
     ssd1306_show_buffer(dev);
 }
