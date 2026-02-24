@@ -26,7 +26,7 @@
  * @return  True se o pixel foi aceso com sucesso
  * @return  False se estava fora dos limites.
  */
-static inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y );
+inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y );
 
 
 /**
@@ -45,7 +45,7 @@ static inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y );
  * @param   size Tamanho do ponto (0, 1 ou 2).
  * @return  void
  */
-static inline void ssd1306_draw_dot_default( 
+inline void ssd1306_draw_dot_default( 
     SSD1306_t* dev, 
     uint8_t x, 
     uint8_t y, 
@@ -67,7 +67,7 @@ static inline void ssd1306_draw_dot_default(
  * @return  void
  * 
  */
-static inline void ssd1306_draw_dot(
+inline void ssd1306_draw_dot(
     SSD1306_t *dev,
     int xc, int yc,
     int size, 
@@ -84,7 +84,7 @@ static inline void ssd1306_draw_dot(
  * @param   dev Ponteiro para a estrutura do dispositivo OLED.
  * @return  void
  */
-static void ssd1306_clear_internal_buffer(SSD1306_t *dev);
+void ssd1306_clear_internal_buffer(SSD1306_t *dev);
 
 
 /**
@@ -99,7 +99,7 @@ static void ssd1306_clear_internal_buffer(SSD1306_t *dev);
  *          se false, gira no sentido horário.
  * @return  void
  */
-static void ssd1306_render_loading_spinner( 
+void ssd1306_render_loading_spinner( 
     SSD1306_t* dev, 
     bool mirror,
     int SPINNER_POINTS = 12,

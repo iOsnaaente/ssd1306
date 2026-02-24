@@ -11,7 +11,7 @@
 
 #include "ssd1306_utils.h"
 
-static inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y ) {
+inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y ) {
     if ( y < 0 || y >= ssd1306_get_height(dev) ) return false;
     if ( x < 0 || x >= ssd1306_get_width(dev)  ) return false;
     _ssd1306_pixel( dev, x, y, false );
@@ -19,7 +19,7 @@ static inline bool ssd1306_pixel_safe( SSD1306_t* dev, int x, int y ) {
 }
 
 
-static inline void ssd1306_draw_dot_default( 
+inline void ssd1306_draw_dot_default( 
     SSD1306_t* dev, 
     uint8_t x, 
     uint8_t y, 
@@ -44,7 +44,7 @@ static inline void ssd1306_draw_dot_default(
 }
 
 
-static inline void ssd1306_draw_dot(
+inline void ssd1306_draw_dot(
     SSD1306_t *dev,
     int xc, int yc,
     int size, bool fill
@@ -93,7 +93,7 @@ static inline void ssd1306_draw_dot(
 }
 
 
-static void ssd1306_clear_internal_buffer(SSD1306_t *dev) {
+void ssd1306_clear_internal_buffer(SSD1306_t *dev) {
     const int pages = ssd1306_get_pages(dev);
     for (int page = 0; page < pages; page++) {
         memset(
@@ -104,15 +104,15 @@ static void ssd1306_clear_internal_buffer(SSD1306_t *dev) {
 }
 
 
-static void ssd1306_render_loading_spinner( 
+void ssd1306_render_loading_spinner( 
     SSD1306_t* dev, 
     bool mirror,
     int SPINNER_POINTS,
     int SPINNER_RADIUS,
     double SPINNER_SPEED
 ) {
-    static float angle_right = 0.0f;
-    static float angle_left  = 0.0f;
+    float angle_right = 0.0f;
+    float angle_left  = 0.0f;
     float* angle = 
         (dev == &left_dev) 
             ? &angle_left 
